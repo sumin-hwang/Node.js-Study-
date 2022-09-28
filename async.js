@@ -11,7 +11,7 @@ fs.readFile('./NodeJS/Node.js-Study-/readme.txt', (err, data)=> {
 fs.readFile('./NodeJS/Node.js-Study-/readme.txt', (err, data)=> {
     if(err){
         throw err;
-    }
+    }  
     console.log('2번', data.toString());
 })
 

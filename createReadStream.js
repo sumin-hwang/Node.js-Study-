@@ -15,7 +15,7 @@ readStream.on('end', ()=> {
 readStream.on('error', (err) => {
     console.log('error', err);  
 }
-
+  
 )
 
 // data : <Buffer ec a1 b0 ea b8 88 ec 94 a9 20 ec a1 b0 ea b8 88> 16
