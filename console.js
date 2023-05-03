@@ -8,7 +8,7 @@ const obj = {
         },
     },
 };
-
+   
 console.time('전체 시간');
 console.log('normal log');
 console.log(string, number, boolean);
