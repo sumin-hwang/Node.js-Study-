@@ -12,7 +12,7 @@ fs.access('./folder', constants.F_OK | constants.W_OK | constants.R_OK)
             return fs.mkdir('./folder');
         }
         return Promise.reject(err);
-    })
+    })` `
 
     .then(()=> {
         console.log('폴더 만들기 성공');
