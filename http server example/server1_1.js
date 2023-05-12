@@ -11,5 +11,5 @@ server.on('listening', ()=> {
     console.log('8080포트에서 서버 대기 중');
 });
 server.on('error', (error)=> {
-    console.error(error);
+    console.error(error);  
 })
