@@ -12,6 +12,8 @@ const parseCookie = (cookie= '') =>
         return acc;
     }, {});
 
+const session = {};
+
 http.createServer(async (req, res)=> {
     const cookies = parseCookie(req.headers.cookie);
 
@@ -19,16 +21,20 @@ http.createServer(async (req, res)=> {
         const {query} = url.parse(req.url);
         const {name} = qs.parse(query);
         const expires = new Date();
-
         expires.setMinutes(expires.getMinutes()+5);
+        const uniqueInt = Date.now();
+        session[uniqueInt] = {
+            name,
+            expires,
+        };
         res.writeHead(302, {
             Location : '/',
-            'Set-Cookie' : `name=${encodeURIComponent(name)}; Expires=${expires.toGMTString()}; HttpOnly; Path=/`,
+            'Set-Cookie' : `session=${uniqueInt}; Expires=${expires.toGMTString()}; HttpOnly; Path=/`,
         });
         res.end();
-    }else if(cookies.name){
+    }else if(cookies.session && session[cookies.session].expires > new Date()){
         res.writeHead(200, {'Content-Type' : 'text/plain; charset=utf-8'});
-        res.end(`${cookies.name}님 안녕하세요`);
+        res.end(`${session[cookies.session].name}님 안녕하세요`);
     }else {
         try{
              const data = await fs.readFile('./NodeJS/Node.js_Study/cookie2.html');
