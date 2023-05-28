@@ -4,8 +4,14 @@
   "description": "learn express!",
   "main": "app.js",
   "scripts": {
-    "start" : "nodemon app"
+    "start": "nodemon app"
   },
   "author": "sumin",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "express-session": "^1.17.3",
+    "morgan": "^1.10.0"
+  }
 }
