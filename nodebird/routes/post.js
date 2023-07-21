@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 const { Post, Hashtag } = require('../models');
-const { isLoggedIn } = require('../middlewares');
+const { isLoggedIn } = require('./middlewares');
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ const uploads = multer({
     limits : { fileSize : 5 * 1024 * 1024},
 });
 
-router.post('/img', isLoggedIn, upload.single('img'), (req, res) => {
+router.post('/img', isLoggedIn, uploads.single('img'), (req, res) => {
     console.log(req.file);
     res.json({url:`/img/${req.file.filename}`});
 });
@@ -62,4 +62,4 @@ router.post('/', isLoggedIn, upload2.none(), async( req, res, next) => {
     }
 });
 
-mainModule.exports =router;
+module.exports = router;
