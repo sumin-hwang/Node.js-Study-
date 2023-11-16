@@ -4,32 +4,50 @@ import superagent from 'superagent';
 import mkdirp from 'mkdirp';
 import { urlToFilename } from './utils.js';
 
-export function spider (url, cb) {
+export function spider (url, nesting, cb) {
   const filename = urlToFilename(url)
-  fs.access(filename, err => { // [1]
-    if (err && err.code === 'ENOENT') {
-      console.log(`Downloading ${url} into ${filename}`)
-      superagent.get(url).end((err, res) => { // [2]
-        if (err) {
-          cb(err)
-        } else {
-          mkdirp(path.dirname(filename), err => { // [3]
-            if (err) {
-              cb(err)
-            } else {
-              fs.writeFile(filename, res.text, err => { // [4]
-                if (err) {
-                  cb(err)
-                } else {
-                  cb(null, filename, true)
-                }
-              })
-            }
-          })
+  fs.readFile(filename, 'utf8', (err, fileContent) => {
+    if(err){
+      if(err.code !== 'ENOENT'){
+        return cb(err);
+      }
+
+      //파일이 존재하지 않기 때문에 다운로드
+      return download(url, filename, (err, requestContent) => {
+        if(err){
+          return cb(err);
         }
+
+        spiderLinks(url, requestContent, nesting, cb)
       })
-    } else {
-      cb(null, filename, false)
     }
+
+    spiderLinks(url, fileContent, nesting, cb)
   })
+}
+
+function spiderLinks(currentUrl, body, nesting, cb){
+  if(nesting === 0 ){
+    return process.nextTick(cb);
+  }
+
+  const links = getPageLinks(currentUrl, body)
+  if(links.length === 0){
+    return process.nextTick(cb);
+  }
+  
+  function iterate(index){
+    if(index === links.length){
+      return cb()
+    }
+
+    spider(links[index], nesting - 1, function (err)){
+      if(err){
+        return cb(err);
+      }
+      iterate(index + 1);
+    }
+  }
+
+  iterate(0);
 }
