@@ -2,7 +2,6 @@ const tasks = [];
 
 const concurrency = 2;
 let running = 0;
-
 let completed = 0;
 let index = 0;
 
