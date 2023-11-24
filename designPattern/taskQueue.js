@@ -14,7 +14,6 @@ export class TaskQueue extends EventEmitter{
     }
 
     next(){
-
         if(this.running === 0 && this.queue.length === 0 ){
             return this.emit('empty');
         }

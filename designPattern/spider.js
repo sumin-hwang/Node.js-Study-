@@ -4,7 +4,22 @@ import superagent from 'superagent';
 import mkdirp from 'mkdirp';
 import { urlToFilename } from './utils.js';
 
-export function spider (url, nesting, cb) {
+const spidering = new Set();
+
+export function spider(url, nesting, queue){
+  if (spidering.has(url)){
+    return;
+  }
+
+  spidering.add(url);
+  queue.pushTask((done) => {
+    spiderTask(url, nesting, queue, done)
+  })
+}
+
+
+
+export function spiderTask (url, nesting, cb) {
   const filename = urlToFilename(url)
   fs.readFile(filename, 'utf8', (err, fileContent) => {
     if(err){
@@ -18,11 +33,13 @@ export function spider (url, nesting, cb) {
           return cb(err);
         }
 
-        spiderLinks(url, requestContent, nesting, cb)
+        spiderLinks3(url, requestContent, nesting, queue); //새로운 링크를 추가하는 함수
+        return cb();
       })
     }
 
-    spiderLinks(url, fileContent, nesting, cb)
+    spiderLinks3(url, fileContent, nesting, queue)
+    return cb();
   })
 }
 
@@ -41,12 +58,12 @@ function spiderLinks1(currentUrl, body, nesting, cb){
       return cb()
     }
 
-    spider(links[index], nesting - 1, function (err)){
-      if(err){
-        return cb(err);
-      }
-      iterate(index + 1);
-    }
+    // spider(links[index], nesting - 1, function (err){
+    //   if(err){
+    //     return cb(err);
+    //   }
+    //   iterate(index + 1);
+    // }
   }
 
   iterate(0);
@@ -76,4 +93,17 @@ function spiderLinks(currentUrl, body, nesting, cb){
 
     links.forEach(link => spider(link, nesting -1, done));
   }
+}
+
+function spiderLinks3(currentUrl, body, nesting, queue){
+  if(nesting === 0){
+    return
+  }
+
+  const links = getPageLinks(currentUrl, body);
+  if(links.length === 0){
+    return;
+  }
+
+  links.forEach(link => spider(link, nesting -1, queue));
 }
