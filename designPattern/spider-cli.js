@@ -9,4 +9,6 @@ const spiderQueue = new TaskQueue(concurrency);
 spiderQueue.on('error', console.error);
 spiderQueue.on('empty', () => console.log('Download complete'));
 
-spider(url, nesting, spiderQueue);
+spider(url, nesting)
+    .then(() => console.log('Download complete'))
+    .catch(err => console.error(err));

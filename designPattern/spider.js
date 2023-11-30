@@ -1,23 +1,50 @@
-import fs from 'fs';
+// import fs from 'fs';
+import { promises as fsPromises } from 'fs';
+import {dirname} from 'path';
 import path from 'path';
 import superagent from 'superagent';
 import mkdirp from 'mkdirp';
-import { urlToFilename } from './utils.js';
+import { urlToFilename, getPageLinks } from './utils.js';
+import { promisify} from 'util';
+
+const mkdirpPromises = promisify(mkdirp);
 
 const spidering = new Set();
 
-export function spider(url, nesting, queue){
-  if (spidering.has(url)){
-    return;
-  }
+export function spider(url, nesting){
+  // if (spidering.has(url)){
+  //   return;
+  // }
 
-  spidering.add(url);
-  queue.pushTask((done) => {
-    spiderTask(url, nesting, queue, done)
-  })
+  // spidering.add(url);
+  // queue.pushTask((done) => {
+  //   spiderTask(url, nesting, queue, done)
+  // })
+  return fsPromises.readFile(filename, 'utf8')
+    .catch((err) => {
+      if(err.code !== 'ENOENT'){
+        throw err;
+      }
+
+      return download(url, filename);
+    })
+    .then(content => spiderLinks4(url, content, nesting));
 }
 
-
+function download(url, filename){
+  console.log(`Downloding ${url}`);
+  let content;
+  return superagent.get(url)
+    .then((res) => {
+      content = res.text;
+      return mkdirpPromises(dirname(filename));
+    })
+    .then(() => fsPromises.writeFile(filename, content))
+    .then(() => {
+        console.log(`Downloaded and saved : ${url}`)
+        return content;
+    })
+}
 
 export function spiderTask (url, nesting, cb) {
   const filename = urlToFilename(url)
@@ -106,4 +133,17 @@ function spiderLinks3(currentUrl, body, nesting, queue){
   }
 
   links.forEach(link => spider(link, nesting -1, queue));
+}
+
+function spiderLinks4(currentUrl, content, nesting){
+  let promise = Promise.resolve();
+  if(nesting === 0){
+    return promise;
+  }
+  const links = getPageLinks(currentUrl, content);
+  for(const link of links){
+    promise = promise.then(() => spider(link, nesgting -1)); // 프라미스를 사용하는 비동기 반복 패턴
+  }
+
+  return promise;
 }
