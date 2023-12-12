@@ -11,15 +11,50 @@ const mkdirpPromises = promisify(mkdirp);
 
 const spidering = new Set();
 
-export function spider(url, nesting){
-  // if (spidering.has(url)){
-  //   return;
-  // }
+async function download(url, filename){
+  console.log(`Downloading ${url}`);
+  const {text :content} = await superagent.get(url);
+  await mkdirpPromises(dirname(filename));
+  await fsPromises.writeFile(filename, content);
+  console.log(`Donloaded and saved : ${url}`);
 
-  // spidering.add(url);
-  // queue.pushTask((done) => {
-  //   spiderTask(url, nesting, queue, done)
-  // })
+  return content;
+}
+
+async function spiderLinks(currentUrl, content, nesting){
+  if(nesting === 0 ){
+    return;
+  }
+  const links = getPageLinks(currentUrl, content)
+  for(const link of links){
+    await spider (link, neting -1);
+  }
+}
+
+export async function spider(url, neting){
+  const filename = urlToFilename(url);
+  let content;
+
+  try{
+    constent = await fsPromises.readFile(filename, 'utf8');
+  }catch(err){
+    if(err.code !== 'ENOENT'){
+      throw err;
+    }
+
+    content = await download(url, filename);
+  }
+
+  return spiderLinks(url, content, nesting);
+}
+
+
+
+
+
+
+
+export function spider2(url, nesting){
   return fsPromises.readFile(filename, 'utf8')
     .catch((err) => {
       if(err.code !== 'ENOENT'){
@@ -31,7 +66,8 @@ export function spider(url, nesting){
     .then(content => spiderLinks4(url, content, nesting));
 }
 
-function download(url, filename){
+
+function download2(url, filename){
   console.log(`Downloding ${url}`);
   let content;
   return superagent.get(url)
@@ -96,7 +132,7 @@ function spiderLinks1(currentUrl, body, nesting, cb){
   iterate(0);
 }
 
-function spiderLinks(currentUrl, body, nesting, cb){
+function spiderLinks2(currentUrl, body, nesting, cb){
   if(nesting === 0){
     return process.nextTick(cb);
   }
