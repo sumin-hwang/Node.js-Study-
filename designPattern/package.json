@@ -53,8 +53,10 @@
     ]
   },
   "dependencies": {
+    "serve-handler": "^6.1.5",
     "slug": "^8.2.3",
-    "superagent": "^8.1.2"
+    "superagent": "^8.1.2",
+    "ws": "^8.15.1"
   },
   "type": "module"
 }
